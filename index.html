@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phantom Space: FILKOM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Fjalla+One&display=swap');
+
+        :root {
+            --p5-red: #D90018;
+            --p5-black: #111111;
+            --p5-grey: #222222;
+            --p5-white: #f0f0f0;
+            --p5-yellow: #f9d81d;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--p5-grey);
+            background-image: 
+                linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
+                linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            font-family: 'Fjalla One', sans-serif;
+            color: var(--p5-black);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- UTILS --- */
+        .hidden { display: none !important; }
+        .skewed { transform: skew(-10deg); }
+        .uppercase { text-transform: uppercase; }
+
+        /* --- CONTAINER --- */
+        #app {
+            width: 375px; /* Mobile size */
+            height: 700px;
+            background: var(--p5-white);
+            position: relative;
+            overflow: hidden;
+            border: 4px solid var(--p5-black);
+            box-shadow: 10px 10px 0px var(--p5-red);
+        }
+
+        /* --- LOGIN SCREEN --- */
+        #login-screen {
+            width: 100%;
+            height: 100%;
+            background: var(--p5-red);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .login-bg-decor {
+            position: absolute;
+            width: 150%;
+            height: 200px;
+            background: var(--p5-black);
+            transform: rotate(-15deg);
+            top: 10%;
+            z-index: 0;
+        }
+
+        .title-box {
+            background: var(--p5-black);
+            color: var(--p5-white);
+            padding: 10px 20px;
+            font-size: 2rem;
+            z-index: 1;
+            transform: skew(-10deg) rotate(-5deg);
+            border: 2px solid var(--p5-white);
+            margin-bottom: 50px;
+        }
+
+        .input-group {
+            margin: 10px 0;
+            z-index: 1;
+            width: 80%;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            background: var(--p5-black);
+            color: var(--p5-white);
+            border: none;
+            font-family: 'Anton', sans-serif;
+            font-size: 1.2rem;
+            transform: skew(-10deg);
+            border-bottom: 4px solid var(--p5-yellow);
+            outline: none;
+        }
+
+        input::placeholder { color: #888; }
+
+        .btn-start {
+            margin-top: 30px;
+            background: var(--p5-yellow);
+            color: var(--p5-black);
+            border: none;
+            padding: 15px 40px;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.5rem;
+            transform: skew(-10deg);
+            cursor: pointer;
+            z-index: 1;
+            transition: 0.2s;
+            box-shadow: 5px 5px 0px var(--p5-black);
+        }
+
+        .btn-start:active {
+            transform: skew(-10deg) translate(2px, 2px);
+            box-shadow: 3px 3px 0px var(--p5-black);
+        }
+
+        /* --- DASHBOARD --- */
+        #dashboard {
+            width: 100%;
+            height: 100%;
+            background: #f2f2f2;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            border-bottom: 3px solid var(--p5-black);
+            padding-bottom: 10px;
+        }
+
+        .date-widget {
+            background: var(--p5-black);
+            color: var(--p5-white);
+            padding: 5px 15px;
+            transform: skew(-10deg);
+            font-size: 0.9rem;
+        }
+
+        .user-profile {
+            font-family: 'Anton', sans-serif;
+            font-size: 1.5rem;
+            color: var(--p5-red);
+            text-shadow: 2px 2px 0px var(--p5-black);
+        }
+
+        .section-title {
+            background: var(--p5-red);
+            color: var(--p5-white);
+            display: inline-block;
+            padding: 5px 20px;
+            transform: skew(-10deg);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            box-shadow: 3px 3px 0px var(--p5-black);
+        }
+
+        .room-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .room-card {
+            background: white;
+            border: 2px solid var(--p5-black);
+            margin-bottom: 15px;
+            padding: 15px;
+            transform: skew(-5deg);
+            transition: 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .room-card:hover {
+            background: var(--p5-black);
+            color: var(--p5-red);
+            transform: skew(-5deg) translateX(10px);
+        }
+
+        .room-card:hover .status-badge {
+            border-color: var(--p5-red);
+            color: var(--p5-red);
+        }
+
+        .room-name {
+            font-size: 1.5rem;
+            font-family: 'Anton', sans-serif;
+            margin: 0;
+        }
+
+        .room-info {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .status-badge {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            border: 2px solid var(--p5-black);
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transform: skew(10deg);
+        }
+
+        .status-safe { color: green; border-color: green; }
+        .status-danger { color: var(--p5-red); border-color: var(--p5-red); text-decoration: line-through; }
+
+        /* --- MODAL (CALLING CARD) --- */
+        #modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .calling-card {
+            width: 300px;
+            background: var(--p5-white);
+            border: 4px solid var(--p5-red);
+            padding: 20px;
+            transform: rotate(-3deg);
+            box-shadow: 0 0 20px var(--p5-red);
+        }
+
+        .cc-header {
+            background: var(--p5-black);
+            color: var(--p5-white);
+            padding: 10px;
+            text-align: center;
+            font-family: 'Anton';
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .cc-label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            background: var(--p5-black);
+            color: var(--p5-white);
+            display: inline-block;
+            padding: 2px 5px;
+            margin-top: 10px;
+        }
+
+        .cc-input {
+            width: 100%;
+            border: 2px solid var(--p5-black);
+            padding: 5px;
+            margin-top: 5px;
+            font-family: 'Fjalla One';
+        }
+
+        .btn-send {
+            width: 100%;
+            background: var(--p5-red);
+            color: var(--p5-white);
+            font-family: 'Anton';
+            font-size: 1.5rem;
+            border: none;
+            padding: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--p5-black);
+            border: none;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* --- SUCCESS ANIMATION --- */
+        #success-screen {
+            background: var(--p5-red);
+            width: 100%; height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .aoa-text {
+            font-family: 'Anton';
+            font-size: 4rem;
+            color: var(--p5-white);
+            -webkit-text-stroke: 2px var(--p5-black);
+            transform: rotate(-10deg);
+            animation: zoomIn 0.3s ease-out;
+        }
+
+        .aoa-sub {
+            font-family: 'Bebas Neue';
+            font-size: 2rem;
+            background: var(--p5-black);
+            color: var(--p5-yellow);
+            padding: 5px 20px;
+            transform: rotate(-5deg);
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0) rotate(-50deg); opacity: 0; }
+            to { transform: scale(1) rotate(-10deg); opacity: 1; }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: var(--p5-black); border: 2px solid #fff; }
+
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- LOGIN SCREEN -->
+        <div id="login-screen">
+            <div class="login-bg-decor"></div>
+            <div class="title-box">PHANTOM SPACE</div>
+            
+            <div class="input-group">
+                <input type="text" placeholder="NIM / CODENAME" value="JOKER_2024">
+            </div>
+            <div class="input-group">
+                <input type="password" placeholder="PASSWORD" value="******">
+            </div>
+
+            <button class="btn-start" onclick="goToDashboard()">SIGN CONTRACT</button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="hidden">
+            <div class="header">
+                <div class="date-widget">
+                    11/20 <span style="color: var(--p5-yellow)">AFTER SCHOOL</span>
+                </div>
+                <div class="user-profile">FILKOM_STUDENT</div>
+            </div>
+
+            <div class="section-title">TARGET: ROOM SELECTION</div>
+
+            <div class="room-list">
+                <!-- Room A -->
+                <div class="room-card" onclick="openBooking('A101 - Algoritma', 'SAFE')">
+                    <h3 class="room-name">A101</h3>
+                    <div class="room-info">Cap: 40 | AC: ON | Wifi: 5Ghz</div>
+                    <div class="status-badge status-safe">SAFE</div>
+                </div>
+
+                <!-- Room B -->
+                <div class="room-card" onclick="openBooking('B204 - Jaringan', 'SAFE')">
+                    <h3 class="room-name">B204</h3>
+                    <div class="room-info">Cap: 30 | Projector: 4K</div>
+                    <div class="status-badge status-safe">SAFE</div>
+                </div>
+
+                <!-- Room F (Full) -->
+                <div class="room-card" style="opacity: 0.6; cursor: not-allowed;">
+                    <h3 class="room-name">F101</h3>
+                    <div class="room-info">Cap: 100 | Auditorium</div>
+                    <div class="status-badge status-danger">OCCUPIED</div>
+                </div>
+                
+                <!-- Room H -->
+                <div class="room-card" onclick="openBooking('H303 - Multimedia', 'SAFE')">
+                    <h3 class="room-name">H303</h3>
+                    <div class="room-info">Cap: 25 | Sound System</div>
+                    <div class="status-badge status-safe">SAFE</div>
+                </div>
+                
+                 <!-- Room G -->
+                 <div class="room-card" onclick="openBooking('G202 - Robotika', 'SAFE')">
+                    <h3 class="room-name">G202</h3>
+                    <div class="room-info">Cap: 20 | Lab Tools</div>
+                    <div class="status-badge status-safe">SAFE</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL -->
+        <div id="modal-overlay" class="hidden">
+            <div class="calling-card">
+                <div class="cc-header">SENDING CALLING CARD</div>
+                <p style="margin:0; text-align:center; font-style:italic;">To the Admin of Shadows...</p>
+                
+                <div class="cc-label">TARGET ROOM</div>
+                <input type="text" id="target-room" class="cc-input" disabled>
+
+                <div class="cc-label">PURPOSE (DESIRE)</div>
+                <input type="text" class="cc-input" placeholder="e.g. Rapat Himpunan">
+
+                <div class="cc-label">TIME (DEADLINE)</div>
+                <input type="time" class="cc-input">
+
+                <button class="btn-send" onclick="submitBooking()">TAKE THE ROOM</button>
+                <button class="btn-cancel" onclick="closeBooking()">Retreat</button>
+            </div>
+        </div>
+
+        <!-- SUCCESS SCREEN -->
+        <div id="success-screen" class="hidden" onclick="resetApp()">
+            <div class="aoa-text">MISSION COMPLETE</div>
+            <div class="aoa-sub">ROOM SECURED</div>
+            <p style="color:white; margin-top:50px; font-size:0.8rem;">(Click to return)</p>
+        </div>
+
+    </div>
+
+    <script>
+        // Navigation Logic
+        function goToDashboard() {
+            // Simple animation effect could go here
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+        }
+
+        function openBooking(roomName, status) {
+            if(status === 'OCCUPIED') return; // Can't book occupied rooms
+
+            document.getElementById('target-room').value = roomName;
+            document.getElementById('modal-overlay').classList.remove('hidden');
+        }
+
+        function closeBooking() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+        }
+
+        function submitBooking() {
+            closeBooking();
+            // Show All-Out Attack Success Screen
+            const successScreen = document.getElementById('success-screen');
+            successScreen.classList.remove('hidden');
+        }
+
+        function resetApp() {
+            document.getElementById('success-screen').classList.add('hidden');
+            // Back to dashboard
+        }
+    </script>
+</body>
+</html>
